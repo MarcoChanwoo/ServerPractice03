@@ -1,6 +1,6 @@
 import Post from '../../modules/post';
 
-/*
+/*  데이터 생성
     POST /api/posts
     {
         title: 제목
@@ -22,10 +22,69 @@ export const write = async (ctx) => {
         ctx.throw(500, e);
     }
 };
-export const list = (ctx) => {};
-export const read = (ctx) => {};
-export const remove = (ctx) => {};
-export const update = (ctx) => {};
+
+/*  데이터 조회
+    GET /api/posts
+*/
+export const list = async (ctx) => {
+    try {
+        const posts = await Post.find().exec();
+        ctx.body = posts;
+    } catch (e) {
+        ctx.throw(500, e);
+    }
+};
+
+/*  특정 포스트 조회
+    GET /api/posts/:id
+*/
+export const read = async (ctx) => {
+    const { id } = ctx.params;
+    try {
+        const post = await Post.findById(id).exec();
+        if (!post) {
+            ctx.status = 404; // Not Found
+            return;
+        }
+        ctx.body = post;
+    } catch (e) {
+        ctx.throw(500, e);
+    }
+};
+
+/*  데이터 삭제
+    DELETE /api/posts/:id
+*/
+export const remove = async (ctx) => {
+    const { id } = ctx.params;
+    try {
+        await Post.findByIdAndRemove(id).exec();
+        ctx.status = 204; // No Content(성공했으나 응답할 데이터는 없음)
+    } catch (e) {
+        ctx.throw(500, e);
+    }
+};
+
+/*  데이터 수정
+    PATCH /api/posts/:id
+*/
+export const update = async (ctx) => {
+    const { id } = ctx.params;
+    try {
+        const post = await Post.findByIdAndUpdate(id, ctx.request.body, {
+            new: true,
+            // true: 업데이트된 데이터를 반환
+            // false: 업데이트되기 전 데이터를 반환
+        }).exec();
+        if (!post) {
+            ctx.status = 404;
+            return;
+        }
+        ctx.body = post;
+    } catch (e) {
+        ctx.throw(500, e);
+    }
+};
 
 // let postId = 1; // id의 초기값
 
