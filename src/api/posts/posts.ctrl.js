@@ -1,4 +1,17 @@
 import Post from '../../modules/post';
+import mongoose from 'mongoose';
+import Joi from 'joi';
+
+const { ObjectId } = mongoose.Types;
+
+export const checkObjectId = (ctx, next) => {
+    const { id } = ctx.params;
+    if (!ObjectId.isValid(id)) {
+        ctx.status = 400; // Bas Request
+        return;
+    }
+    return next();
+};
 
 /*  데이터 생성
     POST /api/posts
@@ -9,6 +22,19 @@ import Post from '../../modules/post';
     }
 */
 export const write = async (ctx) => {
+    const schema = Joi.object().keys({
+        // 객체가 다음 필드를 보유함을 검증
+        title: Joi.string().required(), // required()가 있다면 필수항목
+        body: Joi.string().required(),
+        tags: Joi.array().items(Joi.string()).required(), // 문자열 배열
+    });
+    // 검증 후 실패인 경우 에러처리
+    const result = schema.validate(ctx.request.body);
+    if (result.error) {
+        ctx.status = 400; // Bad Request
+        ctx.body = result.error;
+        return;
+    }
     const { title, body, tags } = ctx.request.body;
     const post = new Post({
         title,
