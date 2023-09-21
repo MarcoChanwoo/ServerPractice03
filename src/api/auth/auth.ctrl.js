@@ -28,6 +28,12 @@ export const register = async (ctx) => {
         await user.save();
 
         ctx.body = user.serialize();
+
+        const token = user.generateToken();
+        ctx.cookies.set('access_token', token, {
+            maxAge: 1000 * 60 * 60 * 24 * 7,
+            httpOnly: true,
+        });
     } catch (e) {
         ctx.throw(500, e);
     }
@@ -53,15 +59,28 @@ export const login = async (ctx) => {
             return;
         }
         ctx.body = user.serialize();
+
+        const token = user.generateToken();
+        ctx.cookies.set('access_token', token, {
+            maxAge: 1000 * 60 * 60 * 24 * 7,
+            httpOnly: true,
+        });
     } catch (e) {
         ctx.throw(500, e);
     }
 };
 
 export const check = async (ctx) => {
-    // 로그인 체크
+    const { user } = ctx.state;
+    if (!user) {
+        // 로그인 중이 아닐 때
+        ctx.state = 401; // Unauthorized
+        return;
+    }
+    ctx.body = user;
 };
 
 export const logout = async (ctx) => {
-    // 로그아웃
+    ctx.cookies.set('access_token');
+    ctx.status = 204; // No Content
 };

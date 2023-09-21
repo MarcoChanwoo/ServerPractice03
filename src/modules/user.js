@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
+import Jwt from 'jsonwebtoken';
 
 const UserSchema = new Schema({
     username: String,
@@ -18,6 +19,20 @@ UserSchema.methods.serialize = function () {
     const data = this.toJSON();
     delete data.hashedPassword;
     return data;
+};
+// 토큰 발급
+UserSchema.methods.generateToken = function () {
+    const token = Jwt.sign(
+        {
+            _id: this.id,
+            username: this.username,
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: '7d',
+        },
+    );
+    return token;
 };
 
 // 스태틱 메드
