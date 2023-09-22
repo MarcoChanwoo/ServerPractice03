@@ -1,7 +1,8 @@
 # ServerPractice03
-- Koa framework
-- Nodemon tool
+- koa framework
 - REST API(Postman)
-- mongoose(MongoDB)
-- JWT 인증
+- mongoose/compass(MongoDB)
+- Request Verification
+- register / login
+- JWT(jsonwebtoken): generate / verification
 - Mac OS
